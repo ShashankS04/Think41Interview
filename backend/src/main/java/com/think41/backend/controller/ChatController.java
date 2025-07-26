@@ -2,13 +2,13 @@ package com.think41.backend.controller;
 
 import com.think41.backend.DTO.ChatRequest;
 import com.think41.backend.DTO.ChatResponse;
-import com.think41.backend.services.ChatService;
+import com.think41.backend.services.ChatService; // Ensure this import is correct
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api") // Base path for your APIs
+@RequestMapping("/api")
 public class ChatController {
 
     private final ChatService chatService;
@@ -19,7 +19,6 @@ public class ChatController {
 
     @PostMapping("/chat")
     public ResponseEntity<ChatResponse> handleChat(@RequestBody ChatRequest request) {
-        // Basic validation
         if (request.getUserId() == null || request.getMessage() == null || request.getMessage().trim().isEmpty()) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
@@ -28,17 +27,14 @@ public class ChatController {
             ChatResponse response = chatService.handleChatMessage(request);
             return ResponseEntity.ok(response);
         } catch (IllegalArgumentException | SecurityException e) {
-            // Handle specific business logic errors
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ChatResponse(null, null, e.getMessage(), null, null));
         } catch (Exception e) {
-            // Catch any unexpected errors
             System.err.println("Error processing chat message: " + e.getMessage());
             e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ChatResponse(null, null, "An internal server error occurred.", null, null));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ChatResponse(null, null, "An internal server error occurred: " + e.getMessage(), null, null));
         }
     }
 
-    // Optional: Endpoint to get full conversation history (useful for debugging/display)
     @GetMapping("/conversations/{sessionId}")
     public ResponseEntity<?> getConversationHistory(@PathVariable Long sessionId) {
         try {
